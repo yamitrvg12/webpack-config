@@ -3,7 +3,7 @@ const path = require('path');
 
 // Plugins covered below
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // Project Configuration
 const configProject = {
@@ -34,7 +34,7 @@ module.exports = {
         contentBase: path.join(__dirname, configProject.publicPath),
         compress: true,
         port: configProject.portServer,
-        stats: "errors-only", // Display only erros in the terminal
+        stats: 'errors-only', // Display only erros in the terminal
         open: true //Open browser
     },
     module: {
@@ -43,7 +43,7 @@ module.exports = {
                 test: /\.scss$/,
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
-                    use: [ 'css-loader', 'sass-loader' ]
+                    use: ['css-loader', 'sass-loader']
                 })
             },
             {
@@ -73,4 +73,4 @@ module.exports = {
         }),
         new ExtractTextPlugin(configProject.cssName)
     ]
-}
+};
