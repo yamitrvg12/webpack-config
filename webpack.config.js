@@ -1,4 +1,5 @@
 // Work with all paths in a cross platform manner
+const webpack = require('webpack');
 const path = require('path');
 
 // Plugins covered below
@@ -20,6 +21,18 @@ const configProject = {
     }
 };
 
+
+// Production vs Development
+const isProd = process.env.NODE_ENV === 'production'; // true or false
+const cssDev = ['style-loader', 'css-loader', 'sass-loader'];
+const cssProd = ExtractTextPlugin.extract({
+    fallback: 'style-loader',
+    use: ['css-loader', 'sass-loader'],
+    publicPath: configProject.publicPath
+});
+
+const cssConfig = isProd ? cssProd : cssDev;
+
 // Merge the common configuration with the environment specific configuration
 module.exports = {
     entry: {
@@ -31,8 +44,9 @@ module.exports = {
         filename: '[name].bundle.js' // Then [name] is reference to the object entry app or post
     },
     devServer: {
-        contentBase: path.join(__dirname, configProject.publicPath),
+        contentBase: path.join(__dirname, configProject.publicPath), // Match the output path
         compress: true,
+        hot: true, // Enable Hot Module Replacement on the server
         port: configProject.portServer,
         stats: 'errors-only', // Display only erros in the terminal
         open: true //Open browser
@@ -41,10 +55,7 @@ module.exports = {
         rules: [
             {
                 test: /\.scss$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: ['css-loader', 'sass-loader']
-                })
+                use: cssConfig
             },
             {
                 test: /\.js$/,
@@ -54,9 +65,9 @@ module.exports = {
             {
                 test: /\.(jpe?g|png|gif|svg)$/i,
                 use: [
-                    'file-loader?name=images/[name].[ext]',
-                    // use: 'file-loader?name=[name].[ext]&outputPath=images/&publicPath=images/'
+                    'file-loader?name=[name].[ext]&outputPath=images/&publicPath=images/',
                     'image-webpack-loader?bypassOnDebug'
+                    // 'file-loader?name=images/[name].[ext]',
                 ]
             }
         ]
@@ -64,10 +75,11 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             minify: {
-                collapseWhitespace: true
+                collapseWhitespace: false
             },
-            excludeChunks: ['post'],
+            excludeChunks: ['post'], // Exclude post from index
             hash: true, // Add a number after the file .js ex: app.bundle.js?327687638
+            filename: 'index.html', // Save into the /dist folder with this (index.html) name.
             template: configProject.htmlTemplate.homePage
         }),
         new HtmlWebpackPlugin({
@@ -75,10 +87,19 @@ module.exports = {
                 collapseWhitespace: true
             },
             hash: true,
-            chunks: ['post'], //Only load the .js file
+            chunks: ['post'], //Only load or include the .js file
             filename: 'post.html',
             template: configProject.htmlTemplate.internalPage
         }),
-        new ExtractTextPlugin(configProject.cssName)
+        new ExtractTextPlugin({
+            filename: configProject.cssName,
+            disable: !isProd,
+            allChunks: true
+        }),
+        new webpack.HotModuleReplacementPlugin(), 
+        //Enable Hot Module Replacement globally
+        
+        new webpack.NamedModulesPlugin() 
+        // Prints more readable module names in the browser console on HMR updates
     ]
 };

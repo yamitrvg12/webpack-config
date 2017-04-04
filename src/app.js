@@ -3,7 +3,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import './app.scss';
+import css from './app.scss';
+
+console.log(css);
 
 ReactDOM.render(
     <h1>Hello, world!</h1>,
