@@ -1,7 +1,9 @@
+@import './bootstrap/customizations.scss';
+
 body {
     background: url('./images/best-price.png') center center no-repeat;
     h1 {
-        background-color: green;
+        background-color: $brand-success;
         color: white;
         padding: 2px 10px;
     }
