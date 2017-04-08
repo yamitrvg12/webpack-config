@@ -6,9 +6,6 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-// Bootstrap
-const bootstrapEntryPoints = require('./webpack.bootstrap.config');
-
 // Project Configuration
 const configProject = {
     entryJs: {
@@ -17,6 +14,7 @@ const configProject = {
     },
     publicPath: 'dist',
     portServer: 9000,
+    cssName: 'app.css',
     htmlTemplate: {
         homePage: './src/index.html',
         internalPage: './src/post.html'
@@ -35,18 +33,15 @@ const cssProd = ExtractTextPlugin.extract({
 
 const cssConfig = isProd ? cssProd : cssDev;
 
-const bootstrapConfig = isProd ? bootstrapEntryPoints.prod : bootstrapEntryPoints.dev;
-
 // Merge the common configuration with the environment specific configuration
 module.exports = {
     entry: {
         app: configProject.entryJs.app,
         post: configProject.entryJs.post,
-        bootstrap: bootstrapConfig
     },
     output: {
         path: path.resolve(__dirname, configProject.publicPath),
-        filename: 'js/[name].bundle.js' // Then [name] is reference to the object entry app or post
+        filename: '[name].bundle.js' // Then [name] is reference to the object entry app or post
     },
     devServer: {
         contentBase: path.join(__dirname, configProject.publicPath), // Match the output path
@@ -70,22 +65,10 @@ module.exports = {
             {
                 test: /\.(jpe?g|png|gif|svg)$/i,
                 use: [
-                    // 'file-loader?name=[name].[ext]&outputPath=images/&publicPath=images/',
-                    'file-loader?name=images/[name].[ext]',
+                    'file-loader?name=[name].[ext]&outputPath=images/&publicPath=images/',
                     'image-webpack-loader?bypassOnDebug'
+                    // 'file-loader?name=images/[name].[ext]',
                 ]
-            },
-            {
-                test: /\.(woff2?|svg)$/, 
-                use: 'url-loader?limit=10000&name=fonts/[name].[ext]'
-            },
-            {
-                test: /\.(ttf|eot)$/, 
-                use: 'file-loader?name=fonts/[name].[ext]'
-            },
-            { 
-                test: /bootstrap-sass[/\\]assets[/\\]javascripts[/\\]/, 
-                use: 'imports-loader?jQuery=jquery' 
             }
         ]
     },
@@ -109,7 +92,7 @@ module.exports = {
             template: configProject.htmlTemplate.internalPage
         }),
         new ExtractTextPlugin({
-            filename: 'css/[name].css',
+            filename: configProject.cssName,
             disable: !isProd,
             allChunks: true
         }),
